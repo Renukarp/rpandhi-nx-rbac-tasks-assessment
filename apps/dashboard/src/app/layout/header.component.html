@@ -1,0 +1,30 @@
+<header class="sticky top-0 z-50 border-b bg-white">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+    <div class="flex items-center gap-3">
+      <div class="h-9 w-9 rounded-xl bg-black"></div>
+      <div>
+        <div class="text-sm font-semibold text-gray-900">Dashboard</div>
+        <div class="text-xs text-gray-500">
+          {{ username() }} · <span class="font-medium">{{ role() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="flex items-center gap-3">
+      <a
+        *ngIf="showAudit()"
+        routerLink="/audit-log"
+        class="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+      >
+        Audit Log
+      </a>
+
+      <button
+        (click)="logout()"
+        class="rounded-lg bg-black px-3 py-2 text-sm font-semibold text-white hover:opacity-90"
+      >
+        Logout
+      </button>
+    </nav>
+  </div>
+</header>

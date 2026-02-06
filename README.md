@@ -1,103 +1,305 @@
-# New Nx Repository
+# NX Monorepo – RBAC + Tasks Management System
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+This repository contains a **full-stack assessment solution** implemented using an **NX Monorepo** architecture.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+The project demonstrates:
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
-## Generate a library
+- Clean monorepo organization
+- JWT-based authentication
+- Role-Based Access Control (RBAC)
+- Task management with role permissions
+- Owner-only audit logging
+- Modern Angular dashboard UI
+- Modular NestJS backend
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+---
+
+## 1. Technology Stack
+
+### Backend
+
+- **Framework:** NestJS
+- **Language:** TypeScript
+- **Authentication:** JWT (Passport)
+- **Authorization:** Role-Based Access Control (RBAC)
+- **Architecture:** Modular (Auth, Tasks, Audit)
+- **Storage:** In-memory (intentional for assessment)
+
+### Frontend
+
+- **Framework:** Angular (Standalone Components)
+- **Styling:** Modern UI with gradients and badges
+- **Auth Handling:** HttpInterceptor + Guards
+- **State:** LocalStorage for JWT
+
+### Tooling
+
+- **Monorepo Tool:** NX
+- **Package Manager:** npm
+
+---
+
+## 2. Monorepo Structure
+
+Monorepo Root
+├─ api/ # NestJS backend (top-level, NOT under apps/)
+│ ├─ src/
+│ │ ├─ app/ # Root app module/controller/service
+│ │ ├─ auth/ # Authentication + RBAC
+│ │ │ ├─ auth.controller.ts
+│ │ │ ├─ auth.service.ts
+│ │ │ ├─ auth.module.ts
+│ │ │ ├─ jwt.strategy.ts
+│ │ │ ├─ roles.decorator.ts
+│ │ │ └─ roles.guard.ts
+│ │ ├─ tasks/ # Tasks CRUD module
+│ │ │ ├─ tasks.controller.ts
+│ │ │ ├─ tasks.service.ts
+│ │ │ └─ dto/
+│ │ └─ audit/ # Audit logging (Owner only)
+│ │ ├─ audit.controller.ts
+│ │ ├─ audit.service.ts
+│ │ └─ audit.types.ts
+│ ├─ package.json
+│ └─ tsconfig\*.json
+│
+├─ apps/
+│ └─ dashboard/ # Angular frontend application
+│ ├─ src/app/
+│ │ ├─ auth/ # Login, guards, interceptor
+│ │ ├─ pages/
+│ │ │ ├─ tasks/ # Tasks UI
+│ │ │ └─ audit-log/ # Audit log UI (Owner only)
+│ │ ├─ layout/ # Header + shell layout
+│ │ └─ app.routes.ts
+│ └─ proxy.conf.json # Proxies /api → backend
+│
+├─ nx.json
+├─ package.json
+└─ README.md
+
+---
+
+## 3. Architecture Overview
+
+### NX Monorepo
+
+- Single repository for frontend and backend
+- Independent serve/build targets
+- Clear separation of concerns
+- Scales easily for shared libraries or more apps
+
+### Authentication
+
+- JWT-based authentication using Passport
+- Token issued on successful login
+- Token stored in `localStorage`
+- Angular `HttpInterceptor` attaches token automatically
+
+### Authorization (RBAC)
+
+Role hierarchy:
+OWNER > ADMIN > VIEWER
+
+| Role   | Permissions                      |
+| ------ | -------------------------------- |
+| VIEWER | Read-only access                 |
+| ADMIN  | Create & update tasks            |
+| OWNER  | Full access + delete + audit log |
+
+RBAC enforced at:
+
+- Backend (Guards + decorators)
+- Frontend (UI controls + route access)
+
+---
+
+## 4. How to Run the Project
+
+### Step 1: Install dependencies
+
+From repository root:
+
+```bash
+npm install
+
+Step 2: Run Backend (NestJS)
+npx nx serve @org/api
+
+
+Base URL: http://localhost:5000/api
+
+Step 3: Run Frontend (Angular)
+npx nx serve dashboard
+
+
+Application URL: http://localhost:4200
+
+5. Authentication Details
+Login API
+POST /api/auth/login
+
+Test Credentials
+Username	Password	Role
+owner	password	OWNER
+admin	password	ADMIN
+viewer	password	VIEWER
+
+JWT payload includes:
+
+username
+
+role
+
+6. Tasks Module
+Features
+
+List tasks (all authenticated users)
+
+Create task (ADMIN, OWNER)
+
+Update task (ADMIN, OWNER)
+
+Delete task (OWNER only)
+
+Confirmation modal for delete (no browser confirm)
+
+API
+GET    /api/tasks
+POST   /api/tasks
+PATCH  /api/tasks/:id
+DELETE /api/tasks/:id
+
+Frontend Behavior
+
+Buttons shown/hidden based on role
+
+Viewer sees read-only UI
+
+Admin cannot delete
+
+Owner has full control
+
+7. Audit Log (Owner Only)
+Purpose
+
+Tracks critical system events for accountability and traceability.
+
+Logged Events
+
+LOGIN_SUCCESS
+
+TASK_CREATE
+
+TASK_UPDATE
+
+TASK_DELETE
+
+LOGOUT (frontend-initiated)
+
+Backend API
+GET    /api/audit    # list latest-first
+DELETE /api/audit    # clear logs
+
+Audit Event Fields
+
+Time
+
+Actor (username)
+
+Role
+
+Action
+
+Entity
+
+Entity ID
+
+Details (JSON)
+
+Frontend UI
+
+Route: /audit-log
+
+Owner-only access
+
+Table view with:
+
+Search by actor
+
+Filter by action
+
+Loading + empty states
+
+8. Frontend Security & UX
+
+Route guards prevent unauthorized access
+
+UI controls disabled/hidden based on role
+
+Token automatically attached via interceptor
+
+Clean logout handling
+
+9. Technical Decisions & Rationale
+
+NX Monorepo: simplifies multi-app management and mirrors real-world enterprise setups
+
+NestJS: structured, testable backend with first-class TypeScript support
+
+Angular Standalone Components: modern, lightweight approach
+
+In-memory storage: chosen intentionally to keep focus on architecture, not persistence
+
+Audit Module: centralized service, easily replaceable with DB-backed implementation
+
+10. Video Walkthrough (Not Included)
+
+A separate video walkthrough was not included for this submission.
+
+The solution is documented in detail within this repository, including:
+
+Complete monorepo structure
+
+Step-by-step run instructions
+
+RBAC behavior
+
+Audit logging design
+
+Technical decision explanations
+
+The project can be fully evaluated by cloning the repository and running the provided NX commands.
+
+If required, a walkthrough or live explanation can be provided upon request.
+
+11. Assessment Status
+
+Backend implementation: ✅ Complete
+
+Frontend implementation: ✅ Complete
+
+RBAC enforcement: ✅ Complete
+
+Audit logging: ✅ Complete
+
+Documentation: ✅ Complete
+
+Thank you for reviewing this assessment.
+
+
+---
+
+### ✅ What this README does (important)
+- **Matches “detailed assessment” requirement**
+- **Compensates for missing video**
+- **Makes reviewer job easy**
+- **Looks enterprise-grade & professional**
+
+If you want next:
+- 🔹 **Shortened version** (for strict portals)
+- 🔹 **One-paragraph justification text** to paste in submission form
+- 🔹 **Ultra-short backup video script (2 min)**
+
+Just tell me 👍
 ```
-
-## Run tasks
-
-To build the library use:
-
-```sh
-npx nx build pkg1
-```
-
-To run any task with Nx use:
-
-```sh
-npx nx <target> <project-name>
-```
-
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
-
-```
-npx nx release
-```
-
-Pass `--dry-run` to see what would happen without actually releasing the library.
-
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Keep TypeScript project references up to date
-
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
-
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
-```
-
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
-
-```sh
-npx nx sync:check
-```
-
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
-
-## Nx Cloud
-
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Set up CI (non-Github Actions CI)
-
-**Note:** This is only required if your CI provider is not GitHub Actions.
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)

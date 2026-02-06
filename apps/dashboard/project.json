@@ -1,0 +1,54 @@
+{
+  "name": "dashboard",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/dashboard/src",
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:browser",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/dashboard",
+        "index": "apps/dashboard/src/index.html",
+        "main": "apps/dashboard/src/main.ts",
+        "tsConfig": "apps/dashboard/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/dashboard/public"
+          }
+        ],
+        "styles": ["apps/dashboard/src/styles.css"]
+      },
+      "configurations": {
+        "production": {
+          "outputHashing": "all"
+        },
+        "development": {
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "options": {
+        "proxyConfig": "apps/dashboard/proxy.conf.json"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "dashboard:build:development"
+        },
+        "production": {
+          "buildTarget": "dashboard:build:production"
+        }
+      },
+      "defaultConfiguration": "development"
+    }
+  }
+}

@@ -1,0 +1,64 @@
+<div class="p-6 max-w-6xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+      <p class="text-slate-500 mt-1">Tasks (read-only for now)</p>
+    </div>
+
+    <button
+      class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100"
+      (click)="reload()"
+    >
+      Reload
+    </button>
+  </div>
+
+  @if (loading()) {
+  <div class="rounded-xl border border-slate-200 bg-white p-6 text-slate-600">
+    Loading tasks...
+  </div>
+  } @else if (errorMsg()) {
+  <div class="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+    {{ errorMsg() }}
+  </div>
+  } @else if (!hasTasks()) {
+  <div class="rounded-xl border border-slate-200 bg-white p-6 text-slate-600">
+    No tasks found.
+  </div>
+  } @else {
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    @for (task of tasks(); track task.id) {
+    <div
+      class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition"
+    >
+      <div class="flex items-start justify-between gap-3">
+        <h3 class="font-semibold text-slate-900">
+          {{ task.title }}
+        </h3>
+
+        <span
+          class="text-xs font-semibold px-3 py-1 rounded-full"
+          [ngClass]="statusClass(task.status)"
+        >
+          {{ task.status }}
+        </span>
+      </div>
+
+      <p class="text-sm text-slate-600 mt-2">
+        {{ task.description || '—' }}
+      </p>
+
+      <div class="mt-4 flex items-center justify-between">
+        <span
+          class="text-xs rounded-full bg-slate-100 px-3 py-1 text-slate-700"
+        >
+          {{ task.category }}
+        </span>
+
+        <span class="text-xs text-slate-400">ID: {{ task.id }}</span>
+      </div>
+    </div>
+    }
+  </div>
+  }
+</div>
